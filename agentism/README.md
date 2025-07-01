@@ -16,31 +16,19 @@ This guide covers:
 ### 1.1 Create a VPS
 
 #### Digital Ocean (Recommended)
-```bash
-# Option 1: Use Digital Ocean CLI (if installed)
-doctl compute droplet create my-dev-server \
-  --image ubuntu-22-04-x64 \
-  --size s-1vcpu-1gb \
-  --region nyc1 \
-  --ssh-keys your-ssh-key-id
-
-# Option 2: Manual creation via web interface
-# 1. Go to https://cloud.digitalocean.com/
-# 2. Create Droplets → Ubuntu 22.04 LTS
-# 3. Choose Basic plan ($4-6/month)
-# 4. Add your SSH key
-# 5. Create Droplet
-```
+1. Go to https://cloud.digitalocean.com/
+2. Create Droplets → Ubuntu 22.04 LTS
+3. Choose Basic plan ($4-6/month)
+4. Add your SSH key (generate on iOS first)
+5. Create Droplet
 
 #### AWS EC2 Alternative
-```bash
-# Using AWS CLI
-aws ec2 run-instances \
-  --image-id ami-0c02fb55956c7d316 \
-  --instance-type t2.micro \
-  --key-name your-key-pair \
-  --security-group-ids sg-xxxxxxxx
-```
+1. Go to https://aws.amazon.com/ec2/
+2. Launch Instance → Ubuntu Server 22.04 LTS
+3. Choose t2.micro (free tier eligible)
+4. Configure security group (allow SSH port 22)
+5. Create or select key pair
+6. Launch instance
 
 #### Other VPS Providers
 - **Linode**: $5/month basic plans
