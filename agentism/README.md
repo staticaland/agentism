@@ -1,13 +1,205 @@
-# Bootstrapping a Project with GitHub CLI
+# Coding from iOS with Claude Code: Complete Setup Guide
 
-This document summarizes how to quickly bootstrap a new project using GitHub CLI.
+This comprehensive guide walks you through setting up a complete development environment for coding from iOS using Claude Code, including VPS setup, GitHub CLI configuration, and project bootstrapping.
 
-## Prerequisites
+## Overview
 
-- GitHub CLI (`gh`) installed and authenticated
-- Basic project files or directory ready
+This guide covers:
+1. **VPS Setup** - Getting a cloud server (Digital Ocean, AWS, etc.)
+2. **Server Configuration** - Installing essential tools and GitHub CLI
+3. **iOS Access** - Connecting from iOS devices using SSH
+4. **Claude Code Integration** - Setting up the development workflow
+5. **Project Bootstrapping** - Quick project creation with GitHub CLI
 
-## Steps
+## Part 1: VPS Setup
+
+### 1.1 Create a VPS
+
+#### Digital Ocean (Recommended)
+```bash
+# Option 1: Use Digital Ocean CLI (if installed)
+doctl compute droplet create my-dev-server \
+  --image ubuntu-22-04-x64 \
+  --size s-1vcpu-1gb \
+  --region nyc1 \
+  --ssh-keys your-ssh-key-id
+
+# Option 2: Manual creation via web interface
+# 1. Go to https://cloud.digitalocean.com/
+# 2. Create Droplets → Ubuntu 22.04 LTS
+# 3. Choose Basic plan ($4-6/month)
+# 4. Add your SSH key
+# 5. Create Droplet
+```
+
+#### AWS EC2 Alternative
+```bash
+# Using AWS CLI
+aws ec2 run-instances \
+  --image-id ami-0c02fb55956c7d316 \
+  --instance-type t2.micro \
+  --key-name your-key-pair \
+  --security-group-ids sg-xxxxxxxx
+```
+
+#### Other VPS Providers
+- **Linode**: $5/month basic plans
+- **Vultr**: $2.50/month starting
+- **Hetzner**: €3.29/month in EU
+
+### 1.2 Initial Server Setup
+
+```bash
+# Connect to your VPS
+ssh root@your-vps-ip
+
+# Update system
+apt update && apt upgrade -y
+
+# Install essential tools
+apt install -y curl wget git vim htop
+
+# Create non-root user
+adduser developer
+usermod -aG sudo developer
+
+# Copy SSH keys to new user
+rsync --archive --chown=developer:developer ~/.ssh /home/developer
+```
+
+## Part 2: Server Configuration
+
+### 2.1 Install GitHub CLI
+
+```bash
+# Install GitHub CLI
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+apt update
+apt install gh -y
+
+# Authenticate with GitHub
+gh auth login
+# Follow prompts: GitHub.com → HTTPS → Authenticate via web browser
+```
+
+### 2.2 Install Claude Code
+
+```bash
+# Install Claude Code CLI
+curl -fsSL https://anthropic.com/claude-code/install.sh | sh
+
+# Or using npm (if Node.js is installed)
+npm install -g @anthropic/claude-code
+
+# Verify installation
+claude-code --version
+```
+
+### 2.3 Development Environment Setup
+
+```bash
+# Install Node.js (for web development)
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+apt-get install -y nodejs
+
+# Install Python (usually pre-installed)
+apt install -y python3 python3-pip
+
+# Install Docker (optional)
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh
+usermod -aG docker developer
+```
+
+## Part 3: iOS Access Setup
+
+### 3.1 SSH Configuration
+
+```bash
+# Edit SSH config for better security
+sudo vim /etc/ssh/sshd_config
+
+# Recommended settings:
+# Port 2222                    # Change default port
+# PermitRootLogin no          # Disable root login
+# PasswordAuthentication no   # Use keys only
+# PubkeyAuthentication yes
+
+# Restart SSH service
+sudo systemctl restart sshd
+```
+
+### 3.2 iOS SSH Clients
+
+**Recommended iOS Apps:**
+- **Termius** (Free/Pro) - Best overall experience
+- **Blink Shell** ($20) - Advanced features
+- **SSH Files** (Free) - File management + terminal
+
+**Connection Setup:**
+```
+Host: your-vps-ip
+Port: 2222 (if changed)
+Username: developer
+Authentication: SSH Key
+```
+
+### 3.3 SSH Key Setup from iOS
+
+```bash
+# On iOS terminal app, generate key pair
+ssh-keygen -t ed25519 -C "your-email@example.com"
+
+# Copy public key to VPS
+ssh-copy-id -p 2222 developer@your-vps-ip
+
+# Or manually add to ~/.ssh/authorized_keys
+```
+
+## Part 4: Claude Code Workflow
+
+### 4.1 Basic Claude Code Usage
+
+```bash
+# Start Claude Code session
+claude-code
+
+# Common commands:
+claude-code --resume          # Resume previous session
+claude-code --project ./      # Start in specific directory
+claude-code --help           # View all options
+```
+
+### 4.2 iOS-Optimized Workflow
+
+```bash
+# Create workspace directory
+mkdir -p ~/workspace
+cd ~/workspace
+
+# Use screen/tmux for persistent sessions
+sudo apt install screen tmux
+
+# Start persistent session
+screen -S coding
+# or
+tmux new-session -s coding
+
+# Inside session, start Claude Code
+claude-code --project .
+
+# Detach: Ctrl+A, D (screen) or Ctrl+B, D (tmux)
+# Reattach: screen -r coding or tmux attach -t coding
+```
+
+## Part 5: Project Bootstrapping with GitHub CLI
+
+### Prerequisites
+
+- VPS with GitHub CLI installed and authenticated
+- SSH access from iOS device
+- Claude Code installed and configured
 
 ### 1. Create GitHub Repository
 
@@ -68,10 +260,129 @@ git push -u origin master
 - **Auto-Configuration**: Git user info pulled from GitHub account
 - **Remote Setup**: Origin remote configured automatically
 
-## Troubleshooting
+## Part 6: Troubleshooting
+
+### Common VPS Issues
+
+```bash
+# SSH connection refused
+sudo systemctl status sshd
+sudo systemctl restart sshd
+
+# Port not accessible
+sudo ufw allow 2222/tcp
+sudo ufw enable
+
+# Out of disk space
+df -h
+sudo apt autoremove
+sudo apt autoclean
+```
+
+### GitHub CLI Issues
+
+```bash
+# Authentication problems
+gh auth status
+gh auth logout
+gh auth login
+
+# Permission denied
+gh auth refresh --scopes repo,workflow
+
+# Repository not found
+gh repo set-default owner/repo-name
+```
+
+### iOS-specific Troubleshooting
+
+#### Connection Drops
+- **Issue**: SSH connection drops frequently
+- **Solution**: Add to `~/.ssh/config`:
+```
+Host your-vps-ip
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+```
+
+#### Keyboard Issues
+- **Issue**: Special keys not working in iOS terminal apps
+- **Solutions**:
+  - Termius: Use custom keyboard with Esc, Tab, Ctrl keys
+  - Blink Shell: Configure external keyboard shortcuts
+  - General: Use `screen` or `tmux` for better terminal management
+
+#### File Transfer
+```bash
+# Using scp from iOS (in supported apps)
+scp -P 2222 local-file developer@your-vps-ip:~/
+
+# Using rsync
+rsync -avz -e "ssh -p 2222" ./local-dir/ developer@your-vps-ip:~/remote-dir/
+```
+
+### Claude Code Issues
+
+```bash
+# API key not set
+export ANTHROPIC_API_KEY="your-key-here"
+echo 'export ANTHROPIC_API_KEY="your-key-here"' >> ~/.bashrc
+
+# Session not resuming
+claude-code --resume --session-id your-session-id
+
+# Memory issues on small VPS
+# Upgrade to larger droplet or use swap:
+sudo fallocate -l 1G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+```
+
+### Project-specific Troubleshooting
 
 - If commit fails due to missing user identity, use `gh auth setup-git` first
 - For private repos, use `--private` flag instead of `--public`
 - Check authentication status with `gh auth status`
+- For large files, consider Git LFS: `git lfs install`
 
-This workflow creates a complete project setup in minutes rather than manual repository creation and configuration.
+## Part 7: Tips for iOS Development
+
+### Optimizing the Experience
+
+1. **Use Persistent Sessions**: Always use `screen` or `tmux`
+2. **Configure Vim**: Install proper vim configuration for better editing
+3. **Alias Commands**: Create shortcuts for common operations
+4. **Backup Regularly**: Set up automated backups to GitHub
+
+### Sample Aliases
+
+```bash
+# Add to ~/.bashrc
+alias ll='ls -la'
+alias gc='git commit'
+alias gs='git status'
+alias cc='claude-code'
+alias proj='cd ~/workspace && claude-code --resume'
+
+# Quick project setup
+alias newproj='mkdir -p ~/workspace/$1 && cd ~/workspace/$1 && git init && gh repo create $1 --source=. --public'
+```
+
+### Recommended VPS Specs
+
+- **Minimum**: 1 CPU, 1GB RAM, 25GB SSD ($4-6/month)
+- **Recommended**: 1 CPU, 2GB RAM, 50GB SSD ($10-12/month)  
+- **Heavy Development**: 2 CPU, 4GB RAM, 80GB SSD ($20-24/month)
+
+## Conclusion
+
+This setup creates a powerful development environment accessible from any iOS device. The combination of VPS + GitHub CLI + Claude Code provides:
+
+- **Professional Development**: Full Linux environment with all tools
+- **Persistent Sessions**: Work continues even when disconnected
+- **Version Control**: Seamless GitHub integration
+- **AI Assistance**: Claude Code for enhanced productivity
+- **iOS Accessibility**: Code anywhere with just an iPad/iPhone
+
+The workflow creates a complete project setup in minutes rather than manual repository creation and configuration, while providing the flexibility of a full development environment accessible from mobile devices.
