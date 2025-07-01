@@ -13,13 +13,34 @@ This guide covers:
 
 ## Part 1: VPS Setup
 
-### 1.1 Create a VPS
+### 1.1 Generate SSH Keys on iOS
+
+#### Method 1: 1Password (Recommended)
+1. Open 1Password iOS app
+2. Tap "+" → "SSH Key"
+3. Name it (e.g., "VPS Development Key")
+4. Choose Ed25519 key type
+5. Generate the key
+6. Copy the public key for VPS setup
+
+#### Method 2: iOS Terminal Apps
+If you don't have 1Password, use a terminal app:
+- **Termius** (Free/Pro) - Built-in key generation
+- **Blink Shell** ($20) - Full SSH management
+- **SSH Files** (Free) - Basic key support
+
+```bash
+ssh-keygen -t ed25519 -C "your-email@example.com"
+cat ~/.ssh/id_ed25519.pub  # Copy this public key
+```
+
+### 1.2 Create a VPS
 
 #### Digital Ocean (Recommended)
 1. Go to https://cloud.digitalocean.com/
 2. Create Droplets → Ubuntu 22.04 LTS
 3. Choose Basic plan ($4-6/month)
-4. Add your SSH key (generate on iOS first)
+4. **Add SSH Key**: Paste your public key from 1Password/terminal
 5. Create Droplet
 
 #### AWS EC2 Alternative
@@ -121,8 +142,8 @@ sudo systemctl restart sshd
 ### 3.2 iOS SSH Clients
 
 **Recommended iOS Apps:**
-- **Termius** (Free/Pro) - Best overall experience
-- **Blink Shell** ($20) - Advanced features
+- **Termius** (Free/Pro) - Best overall experience, 1Password integration
+- **Blink Shell** ($20) - Advanced features, 1Password SSH agent support
 - **SSH Files** (Free) - File management + terminal
 
 **Connection Setup:**
@@ -130,16 +151,19 @@ sudo systemctl restart sshd
 Host: your-vps-ip
 Port: 2222 (if changed)
 Username: developer
-Authentication: SSH Key
+Authentication: SSH Key (from 1Password or terminal app)
 ```
 
-### 3.3 SSH Key Setup from iOS
+### 3.3 Using SSH Keys with iOS Apps
 
+#### With 1Password (Recommended)
+- **Termius**: Enable 1Password integration in settings
+- **Blink Shell**: Configure SSH agent to use 1Password
+- Keys are automatically available and secure
+
+#### With Terminal App Keys
 ```bash
-# On iOS terminal app, generate key pair
-ssh-keygen -t ed25519 -C "your-email@example.com"
-
-# Copy public key to VPS
+# If you generated keys in terminal app, copy public key to VPS
 ssh-copy-id -p 2222 developer@your-vps-ip
 
 # Or manually add to ~/.ssh/authorized_keys
