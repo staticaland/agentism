@@ -1,0 +1,4 @@
+baseURL = 'https://agentism.io/'
+languageCode = 'en-us'
+title = 'Agentism'
+theme = 'minimal'
