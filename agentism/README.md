@@ -1,12 +1,11 @@
 # Bootstrapping a Project with GitHub CLI
 
-This document summarizes how to quickly bootstrap a new project using GitHub CLI and Hugo.
+This document summarizes how to quickly bootstrap a new project using GitHub CLI.
 
 ## Prerequisites
 
 - GitHub CLI (`gh`) installed and authenticated
-- Hugo static site generator installed
-- Git initialized in your project directory
+- Basic project files or directory ready
 
 ## Steps
 
@@ -20,20 +19,13 @@ git init
 gh repo create your-project-name --source=. --public
 ```
 
-### 2. Setup Hugo Blog (Optional)
+### 2. Create README (Optional)
 
 ```bash
-# Create new Hugo site in current directory
-hugo new site your-site-name --force
-
-# Navigate to Hugo site directory
-cd your-site-name
-
-# Create minimal theme
-hugo new theme minimal
-
-# Configure site in hugo.toml
-# - Set baseURL, title, theme
+# Create a basic README file
+echo "# Your Project Name" > README.md
+echo "" >> README.md
+echo "Project description goes here." >> README.md
 ```
 
 ### 3. Configure Git with GitHub CLI
@@ -57,11 +49,9 @@ gh repo set-default owner/repo-name
 git add .
 
 # Commit with descriptive message
-git commit -m "Initial project setup
+git commit -m "Initial commit
 
-- Project structure created
-- Configuration files added
-- Ready for development
+Add README and project setup
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
